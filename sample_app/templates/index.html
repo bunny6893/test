@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chryselys Omnichannel HCP Optimizer</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --accent: #38bdf8;
+            --success-bg: #064e3b;
+            --success-border: #10b981;
+            --success-text: #a7f3d0;
+            --danger-bg: #7f1d1d;
+            --danger-border: #ef4444;
+            --danger-text: #fecaca;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 50px; }
+
+        /* Simulator Bar */
+        .simulator-bar {
+            background: #020617;
+            color: #94a3b8;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .simulator-controls { display: flex; gap: 8px; }
+        .sim-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .sim-btn:hover { background: #334155; color: #fff; }
+        .sim-btn.active { background: var(--primary); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+        /* Navbar */
+        nav {
+            background: #1e293b;
+            border-bottom: 1px solid var(--border);
+            padding: 18px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-logo { font-size: 22px; font-weight: 800; color: #f8fafc; letter-spacing: -0.5px; }
+        .brand-logo span { color: var(--accent); }
+        .badge-live {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .user-status { font-size: 13px; color: var(--text-muted); }
+
+        .wrapper { max-width: 1040px; margin: 36px auto; padding: 0 24px; }
+
+        /* KPI Dashboard */
+        .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+        }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .kpi-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+        .kpi-num { font-size: 30px; font-weight: 800; color: #f8fafc; margin-top: 8px; }
+        .kpi-delta { font-size: 13px; color: #34d399; margin-top: 4px; font-weight: 500; }
+
+        /* Form Card */
+        .workspace-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        .section-header { margin-bottom: 24px; }
+        .section-title { font-size: 20px; font-weight: 700; color: #f8fafc; }
+        .section-desc { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .form-full { grid-column: span 2; }
+        .form-item label { display: block; font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+        .form-input, .form-select {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+
+        .btn-action {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+        }
+        .btn-action:hover { background: var(--primary-hover); box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5); }
+
+        /* Results Display */
+        #forecast-result {
+            margin-top: 28px;
+            padding: 24px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .result-success { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
+        .result-error { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text); }
+    </style>
+</head>
+<body>
+
+    <!-- Simulator Switcher -->
+    <div class="simulator-bar">
+        <div><strong>Developer Commit Simulator:</strong> <span id="current-mode-label" style="color: #38bdf8;">Clean Baseline</span></div>
+        <div class="simulator-controls">
+            <button class="sim-btn active" id="btn-mode-clean" onclick="setMode('clean')">1. Clean Baseline</button>
+            <button class="sim-btn" id="btn-mode-drift" onclick="setMode('drift')">2. Commit: UI Drift (Button Renamed)</button>
+            <button class="sim-btn" id="btn-mode-bug" onclick="setMode('bug')">3. Commit: App Bug (Crash)</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="brand">
+            <div class="brand-logo">Chryselys <span>HCP AI</span></div>
+            <span class="badge-live">Omnichannel Suite v2.0</span>
+        </div>
+        <div class="user-status">Workspace: <strong>Commercial Analytics Production</strong></div>
+    </nav>
+
+    <div class="wrapper">
+        <!-- Metrics -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-title">Physicians Reached</div>
+                <div class="kpi-num">14,850</div>
+                <div class="kpi-delta">▲ +12.4% vs Last Month</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Rep Digital Adoption</div>
+                <div class="kpi-num">91.6%</div>
+                <div class="kpi-delta">▲ 4.2% Above Target</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Prescription Lift Forecast</div>
+                <div class="kpi-num">+19.8%</div>
+                <div class="kpi-delta">▲ NBA Model Confidence 96%</div>
+            </div>
+        </div>
+
+        <!-- Form Workspace -->
+        <div class="workspace-card">
+            <div class="section-header">
+                <h1 class="section-title">Omnichannel HCP Campaign Optimizer</h1>
+                <p class="section-desc">Tune physician cluster parameters and trigger omnichannel AI allocation for regional field reps.</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-item form-full">
+                    <label for="target-physician-cluster">Target Physician Cluster</label>
+                    <input type="text" id="target-physician-cluster" class="form-input" value="Cardiology Tier-1 High Volume" />
+                </div>
+
+                <div class="form-item">
+                    <label for="channel-preference">Primary Channel Route</label>
+                    <select id="channel-preference" class="form-select">
+                        <option value="digital-email">Digital Rep Email Sequence</option>
+                        <option value="webinar">Live Key Opinion Leader Webinar</option>
+                        <option value="field-visit">In-Person Priority Field Visit</option>
+                        <option value="journal-ad">Medical Journal Sponsorship</option>
+                    </select>
+                </div>
+
+                <div class="form-item">
+                    <label for="budget-allocation-k">Budget Allocation ($k)</label>
+                    <input type="number" id="budget-allocation-k" class="form-input" value="125" min="10" max="1000" />
+                </div>
+            </div>
+
+            <!-- Dynamic Action Button -->
+            <div id="button-container">
+                <button id="launch-forecast-btn" class="btn-action" onclick="handleAction()">Launch Forecast Model</button>
+            </div>
+
+            <!-- Results Output -->
+            <div id="forecast-result" class="result-box result-container">
+                <h3 id="result-title" style="margin-bottom: 8px; font-size: 17px; font-weight: 700;"></h3>
+                <p id="result-text" style="font-size: 14px; line-height: 1.5;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = "clean";
+
+        function setMode(mode) {
+            currentMode = mode;
+            fetch('/set-mode?mode=' + mode).catch(() => {});
+            document.querySelectorAll(".sim-btn").forEach(b => b.classList.remove("active"));
+            const btn = document.getElementById("btn-mode-" + mode);
+            if (btn) btn.classList.add("active");
+
+            const label = document.getElementById("current-mode-label");
+            const btnContainer = document.getElementById("button-container");
+            const resultBox = document.getElementById("forecast-result");
+            if (resultBox) resultBox.style.display = "none";
+
+            if (mode === "clean") {
+                if (label) label.innerText = "Clean Baseline (Working Normally)";
+                if (btnContainer) btnContainer.innerHTML = '<button id="run-optimizer-btn" class="btn-action" onclick="handleAction()">Run Omnichannel AI Optimizer</button>';
+            } else if (mode === "drift") {
+                if (label) label.innerText = "Commit: UI Drift (Button ID renamed to 'launch-forecast-btn' & Text renamed to 'Launch Forecast Model')";
+                if (btnContainer) btnContainer.innerHTML = '<button id="launch-forecast-btn" class="btn-action" onclick="handleAction()">Launch Forecast Model</button>';
+            } else if (mode === "bug") {
+                if (label) label.innerText = "Commit: App Bug (Unhandled Null Pointer Exception on submit)";
+                if (btnContainer) btnContainer.innerHTML = '<button id="run-optimizer-btn" class="btn-action" onclick="handleAction()">Run Omnichannel AI Optimizer</button>';
+            }
+        }
+
+        function handleAction() {
+            const resultBox = document.getElementById("forecast-result");
+            const title = document.getElementById("result-title");
+            const text = document.getElementById("result-text");
+
+            if (currentMode === "bug") {
+                resultBox.className = "result-error";
+                resultBox.style.display = "block";
+                title.innerText = "Application Error 500: Uncaught TypeError";
+                text.innerText = "Uncaught TypeError: Cannot read properties of undefined (reading 'calculate_roi'). Omnichannel forecast aborted.";
+                setTimeout(() => {
+                    throw new Error("Uncaught TypeError: Cannot read properties of undefined (reading 'calculate_roi')");
+                }, 10);
+                return;
+            }
+
+            // Normal success
+            resultBox.className = "result-success";
+            resultBox.style.display = "block";
+            title.innerText = "Success: Omnichannel Allocation Computed";
+            text.innerText = "Forecast Generated: +23.4% projected lift in HCP conversions across 14,850 physicians with optimal digital-email mix.";
+        }
+    </script>
+</body>
+</html>
